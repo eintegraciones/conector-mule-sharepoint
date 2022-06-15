@@ -46,7 +46,7 @@ public class SharepointGraph {
 	
 	public String findSites(String nameSiteFind, int nExec) {
 		String infoSite = "{\"response\":\"not found\"}";
-		log.info("findSites " + nameSiteFind +  " " + nExec);
+		log.debug("findSites " + nameSiteFind +  " " + nExec);
 		
 		if (nExec < 3) {
 			String urlFindSites = "https://graph.microsoft.com/v1.0/sites?search=" + nameSiteFind;
@@ -79,6 +79,8 @@ public class SharepointGraph {
 				int statusCode = httpResponse.getStatusLine().getStatusCode();
 				String response = sharepointUtil.getBodyResponse(httpResponse.getEntity().getContent());
 				if (statusCode == HttpURLConnection.HTTP_OK) {
+					log.debug("Response: " + response);
+					log.debug("urlFindSites: " + urlFindSites + "##");
 					JSONObject jResponse = new JSONObject(response);
 					if (jResponse.has("value")) {
 						JSONArray jaValue = jResponse.getJSONArray("value");
@@ -86,19 +88,20 @@ public class SharepointGraph {
 							JSONObject jValue = jaValue.getJSONObject(i);
 							if (jValue.has("name")) {
 								String nameSite = jValue.getString("name");
-								if (nameSiteFind.equalsIgnoreCase(nameSite)) {
+								if (nameSiteFind.trim().equalsIgnoreCase(nameSite.trim())) {
 									infoSite = jValue.toString();
 								}
 							}
 						}
 					}
+					
 				} else if (statusCode == 429) {
-					log.info("ERROR 429");
+					log.debug("ERROR 429");
 					Integer retryAfter = sharepointUtil.getHeadersRetryAfter(httpResponse);
-					log.info("retryAfter " + retryAfter);
+					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    findSites(nameSiteFind, nExec + 1);
+	                    infoSite = findSites(nameSiteFind, nExec + 1);
 					}
 	           
 				} else {
@@ -106,18 +109,23 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::findSites()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::findSites()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
+		log.debug("response: " + infoSite);
 		return infoSite;
 	}
 	
 	
-	public String findDriveId(String idSite, String nameDriveFind, int nExec) {
+	public String findDriveId(String idSite, String nameDriveFind, int nExec) throws SharepointException {
 		String infoDrive = "{\"response\":\"not found\"}";
 		log.debug("findDriveId " + nameDriveFind +  " " + nExec);
 		
@@ -171,21 +179,26 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    findDriveId(idSite, nameDriveFind, nExec + 1);
+	                    infoDrive = findDriveId(idSite, nameDriveFind, nExec + 1);
 					}
 	           
 				} else {
-					String error = "Error [SharepointGraph::findDriveId()::response code:["+ statusCode + "]";
+					String error = "Error [SharepointGraph::findDriveId()::response code:["+ statusCode + "] url:" +  urlFindDrive;
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::findDriveId()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::findDriveId()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
 						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
+		log.debug("response: " + infoDrive);
 		return infoDrive;
 	}
 	
@@ -238,7 +251,7 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    findItemId(idSite, idDrive, nameItemFind, nExec + 1);
+	                    infoItem = findItemId(idSite, idDrive, nameItemFind, nExec + 1);
 					}
 	           
 				} else {
@@ -246,13 +259,18 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::findItemId()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::findItemId()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
+		log.debug("response: " + infoItem);
 		return infoItem;
 	}
 	
@@ -311,7 +329,7 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    findFile(idSite, idDrive, nameFile, nExec + 1);
+	                    infoFile = findFile(idSite, idDrive, nameFile, nExec + 1);
 					}
 	           
 				} else {
@@ -319,13 +337,18 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::findFile()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::findFile()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
+		log.debug("response: " + infoFile);
 		return infoFile;
 	}
 	
@@ -383,7 +406,7 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    putFile(idSite,idDrive, fileContent, nameFile, nExec + 1);
+	                    infoFile = putFile(idSite,idDrive, fileContent, nameFile, nExec + 1);
 					}
 	           
 				} else {
@@ -391,10 +414,14 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::putFile()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::putFile()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
@@ -428,10 +455,14 @@ public class SharepointGraph {
 			}
 		
 		} catch (Exception e) {
-			String error = "Error [SharepointGraph::putFile()::read response formnat json]";
-			log.error(error, e);
-			throw new SharepointException(error + " ex:" + e.getMessage(),
-					SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+			if (e instanceof SharepointException) {
+				throw (SharepointException) e;
+			} else {
+				String error = "Error [SharepointGraph::putFile()::read response formnat json]";
+				log.error(error, e);
+				throw new SharepointException(error + " ex:" + e.getMessage(),
+						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+			}
 		} 
 		
 		return infoFile;
@@ -490,7 +521,7 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    postFileCreateUploadSession(idSite, idDrive, nameFile, fileSize, nExec + 1);
+	                    uploadUrl = postFileCreateUploadSession(idSite, idDrive, nameFile, fileSize, nExec + 1);
 					}
 	           
 				} else {
@@ -498,10 +529,14 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::putFile()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::putFile()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
@@ -574,7 +609,7 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    postFileLoadByte(urlFileTemp, fileSize, fileRange, bytesFile, nExec + 1);
+	                    nextExpectedRanges = postFileLoadByte(urlFileTemp, fileSize, fileRange, bytesFile, nExec + 1);
 					}
 	           
 				} else {
@@ -582,10 +617,14 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::putFile()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::putFile()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} finally {
 				System.gc();
 			}
@@ -638,7 +677,7 @@ public class SharepointGraph {
 					log.debug("retryAfter " + retryAfter);
 					if (retryAfter.compareTo(0) != 0) {
 	                    Thread.sleep(retryAfter * 1000);
-	                    getFile(idSite, idDrive, idFile, nExec + 1);
+	                    isResponse = getFile(idSite, idDrive, idFile, nExec + 1);
 					}
 	           
 				} else {
@@ -647,10 +686,14 @@ public class SharepointGraph {
 					sharepointUtil.thorwExceptionCode(statusCode, error, response);
 				}
 			} catch (Exception e) {
-				String error = "Error [SharepointGraph::getFile()::read response formnat json]";
-				log.error(error, e);
-				throw new SharepointException(error + " ex:" + e.getMessage(),
-						SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				if (e instanceof SharepointException) {
+					throw (SharepointException) e;
+				} else {
+					String error = "Error [SharepointGraph::getFile()::read response formnat json]";
+					log.error(error, e);
+					throw new SharepointException(error + " ex:" + e.getMessage(),
+							SharepointErrorTypeDefinition.INTERNAL_SERVER_ERROR);
+				}
 			} 
 		}
 		
@@ -749,7 +792,6 @@ public class SharepointGraph {
 		
 		String idSite = "0";
 		String infoSite = findSites(nameSite, 0);
-		
 		JSONObject jInfoSite = new JSONObject(infoSite);
 		if (jInfoSite.has("id")) {
 			idSite = jInfoSite.getString("id");
