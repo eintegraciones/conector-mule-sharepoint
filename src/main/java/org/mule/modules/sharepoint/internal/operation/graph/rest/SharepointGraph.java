@@ -49,9 +49,12 @@ public class SharepointGraph {
 		log.debug("findSites " + nameSiteFind +  " " + nExec);
 		
 		if (nExec < 3) {
-			String urlFindSites = "https://graph.microsoft.com/v1.0/sites?search=" + nameSiteFind;
 			HttpResponse httpResponse = null;
+			String urlFindSites = "";
 			try {
+				String nameSiteFindEncode = URLEncoder.encode(nameSiteFind, StandardCharsets.UTF_8.toString());
+				urlFindSites = "https://graph.microsoft.com/v1.0/sites?search=" + nameSiteFindEncode;
+
 				HttpClient httpclient = HttpClientBuilder.create().build();
 				HttpGet httpGet = new HttpGet(urlFindSites);
 				httpGet.setHeader("Authorization", "Bearer " + this.token);
@@ -86,8 +89,8 @@ public class SharepointGraph {
 						JSONArray jaValue = jResponse.getJSONArray("value");
 						for (int i = 0; i < jaValue.length(); i++) {
 							JSONObject jValue = jaValue.getJSONObject(i);
-							if (jValue.has("name")) {
-								String nameSite = jValue.getString("name");
+							if (jValue.has("displayName")) {
+								String nameSite = jValue.getString("displayName");
 								if (nameSiteFind.trim().equalsIgnoreCase(nameSite.trim())) {
 									infoSite = jValue.toString();
 								}

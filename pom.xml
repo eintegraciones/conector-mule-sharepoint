@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>663a0048-7c7b-47be-9b95-bde284c854c9</groupId>
 	<artifactId>mule-sharepoint-connector</artifactId>
-	<version>1.1.14</version>
+	<version>1.1.16</version>
 	<packaging>mule-extension</packaging>
 	<name>Sahrepoint Graph - Mule4</name>
 	<description>Sahrepoint connector Mulesoft Graph</description>
