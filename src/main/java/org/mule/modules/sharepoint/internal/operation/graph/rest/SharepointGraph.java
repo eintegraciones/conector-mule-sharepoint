@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 
 
@@ -50,13 +50,19 @@ public class SharepointGraph {
 		
 		if (nExec < 3) {
 			HttpResponse httpResponse = null;
-			String urlFindSites = "";
+			URL urlFindSites = null;
 			try {
-				String nameSiteFindEncode = URLEncoder.encode(nameSiteFind, StandardCharsets.UTF_8.toString());
-				urlFindSites = "https://graph.microsoft.com/v1.0/sites?search=" + nameSiteFindEncode;
-
+				urlFindSites = new URL("https://graph.microsoft.com/v1.0/sites?search=" + nameSiteFind);
+				URI uriFindSites = new URI(urlFindSites.getProtocol(),
+						urlFindSites.getUserInfo(),
+	                    urlFindSites.getHost(),
+	                    urlFindSites.getPort(),
+	                    urlFindSites.getPath(),
+	                    urlFindSites.getQuery(), urlFindSites.getRef());
+	            String urlFindSitesEncode = uriFindSites.toASCIIString();
+				
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpGet httpGet = new HttpGet(urlFindSites);
+				HttpGet httpGet = new HttpGet(urlFindSitesEncode);
 				httpGet.setHeader("Authorization", "Bearer " + this.token);
 				
 				if (this.timeout != null && this.timeout.compareTo(0) == 1) {
@@ -133,11 +139,20 @@ public class SharepointGraph {
 		log.debug("findDriveId " + nameDriveFind +  " " + nExec);
 		
 		if (nExec < 3) {
-			String urlFindDrive = "https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives";
 			HttpResponse httpResponse = null;
+			URL urlFindDrive = null;
 			try {
+				urlFindDrive = new URL("https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives");
+				URI uriFindDrive = new URI(urlFindDrive.getProtocol(),
+						urlFindDrive.getUserInfo(),
+	                    urlFindDrive.getHost(),
+	                    urlFindDrive.getPort(),
+	                    urlFindDrive.getPath(),
+	                    urlFindDrive.getQuery(), urlFindDrive.getRef());
+	            String urlFindDriveEncode = uriFindDrive.toASCIIString();
+	            
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpGet httpGet = new HttpGet(urlFindDrive);
+				HttpGet httpGet = new HttpGet(urlFindDriveEncode);
 				httpGet.setHeader("Authorization", "Bearer " + this.token);
 				
 				if (this.timeout != null && this.timeout.compareTo(0) == 1) {
@@ -211,11 +226,20 @@ public class SharepointGraph {
 		log.debug("findItemId " + nameItemFind +  " " + nExec);
 		
 		if (nExec < 3) {
-			String urlFindItem = "https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root";
+			
 			HttpResponse httpResponse = null;
 			try {
+				URL urlFindItem = new URL("https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root");
+				URI uriFindItem = new URI(urlFindItem.getProtocol(),
+						urlFindItem.getUserInfo(),
+	                    urlFindItem.getHost(),
+	                    urlFindItem.getPort(),
+	                    urlFindItem.getPath(),
+	                    urlFindItem.getQuery(), urlFindItem.getRef());
+	            String urlFindItemEncode = uriFindItem.toASCIIString();
+	            
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpGet httpGet = new HttpGet(urlFindItem);
+				HttpGet httpGet = new HttpGet(urlFindItemEncode);
 				httpGet.setHeader("Authorization", "Bearer " + this.token);
 				
 				if (this.timeout != null && this.timeout.compareTo(0) == 1) {
@@ -283,11 +307,19 @@ public class SharepointGraph {
 		log.debug("findFile " + nameFile +  " " + nExec);
 		
 		if (nExec < 3) {
-			String urlFindFile = "https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root/children";
 			HttpResponse httpResponse = null;
 			try {
+				URL urlFindFile = new URL("https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root/children");
+				URI uriFindFile = new URI(urlFindFile.getProtocol(),
+						urlFindFile.getUserInfo(),
+	                    urlFindFile.getHost(),
+	                    urlFindFile.getPort(),
+	                    urlFindFile.getPath(),
+	                    urlFindFile.getQuery(), urlFindFile.getRef());
+	            String urlFindFileEncode = uriFindFile.toASCIIString();
+				
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpGet httpGet = new HttpGet(urlFindFile);
+				HttpGet httpGet = new HttpGet(urlFindFileEncode);
 				httpGet.setHeader("Authorization", "Bearer " + this.token);
 				
 				if (this.timeout != null && this.timeout.compareTo(0) == 1) {
@@ -358,15 +390,23 @@ public class SharepointGraph {
 	
 	public String putFile(String idSite, String idDrive, InputStream fileContent, String nameFile, int nExec) {
 		String infoFile = "{\"response\":\"not found\"}";
-		log.debug("putFile " + nameFile +  " " + nExec);
-		
+		log.debug("putFile " + nameFile +  " " + nExec);	
 		if (nExec < 3) {
-			String urlFileLoad = "https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root:/" + nameFile + ":/content";
+			
 			
 			HttpResponse httpResponse = null;
 			try {
+				URL urlFileLoad = new URL("https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root:/" + nameFile + ":/content");
+				URI uriFileLoad = new URI(urlFileLoad.getProtocol(),
+						urlFileLoad.getUserInfo(),
+	                    urlFileLoad.getHost(),
+	                    urlFileLoad.getPort(),
+	                    urlFileLoad.getPath(),
+	                    urlFileLoad.getQuery(), urlFileLoad.getRef());
+	            String urlFileLoadEncode = uriFileLoad.toASCIIString();
+				
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpPut httpPut = new HttpPut(urlFileLoad);
+				HttpPut httpPut = new HttpPut(urlFileLoadEncode);
 				httpPut.setHeader("Authorization", "Bearer " + this.token);
 				//httpPut.setHeader("Content-Type", "application/octet-stream");
 	
@@ -479,11 +519,20 @@ public class SharepointGraph {
 		log.debug("postFileCreateUploadSession " + nameFile +  " " + nExec);
 		
 		if (nExec < 3) {
-			String urlFileTemporl = "https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root:/" + nameFile + ":/createUploadSession";	
+			
 			HttpResponse httpResponse = null;
 			try {
+				URL urlFileTemporl = new URL("https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/root:/" + nameFile + ":/createUploadSession");	
+				URI uriFileTemporl = new URI(urlFileTemporl.getProtocol(),
+						urlFileTemporl.getUserInfo(),
+	                    urlFileTemporl.getHost(),
+	                    urlFileTemporl.getPort(),
+	                    urlFileTemporl.getPath(),
+	                    urlFileTemporl.getQuery(), urlFileTemporl.getRef());
+	            String urlFileTemporlEncode = uriFileTemporl.toASCIIString();
+				
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpPost httpPost = new HttpPost(urlFileTemporl);
+				HttpPost httpPost = new HttpPost(urlFileTemporlEncode);
 				httpPost.setHeader("Authorization", "Bearer " + this.token);
 				httpPost.setHeader("Content-Type", "application/json");
 	
@@ -641,13 +690,21 @@ public class SharepointGraph {
 		InputStream isResponse = null;
 		log.debug("getFile " + idFile +  " " + nExec);
 		
-		if (nExec < 3) {
-			String urlFileDownload = "https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/items/" + idFile + "/content";
-			
+		if (nExec < 3) {		
 			HttpResponse httpResponse = null;
 			try {
+				
+				URL urlFileDownload = new URL("https://graph.microsoft.com/v1.0/sites/" + idSite + "/drives/" + idDrive + "/items/" + idFile + "/content");
+				URI uriFileDownload = new URI(urlFileDownload.getProtocol(),
+						urlFileDownload.getUserInfo(),
+						urlFileDownload.getHost(),
+						urlFileDownload.getPort(),
+						urlFileDownload.getPath(),
+						urlFileDownload.getQuery(), urlFileDownload.getRef());
+	            String urlFileDownloadEncode = uriFileDownload.toASCIIString();
+
 				HttpClient httpclient = HttpClientBuilder.create().build();
-				HttpGet httpGet = new HttpGet(urlFileDownload);
+				HttpGet httpGet = new HttpGet(urlFileDownloadEncode);
 				httpGet.setHeader("Authorization", "Bearer " + this.token);
 				
 				if (this.timeout != null && this.timeout.compareTo(0) == 1) {
@@ -711,7 +768,7 @@ public class SharepointGraph {
 		byte[] bytes = null;
 		try {
 			fileContent = new FileInputStream(fileLoad);
-			nameFileEncode = URLEncoder.encode(fileLoad.getName(), StandardCharsets.UTF_8.toString());
+			//nameFileEncode = URLEncoder.encode(fileLoad.getName(), StandardCharsets.UTF_8.toString());
 			if (4194304 > fileContent.available()) {
 				infoFile = loadFile(nameSite, nameDrive, fileContent, nameFileEncode);
 			} else {
@@ -754,7 +811,7 @@ public class SharepointGraph {
 
 		try {
 			bytes = Base64.decodeBase64(byteBase64);
-			nameFileEncode = URLEncoder.encode(nameFile, StandardCharsets.UTF_8.toString());
+			//nameFileEncode = URLEncoder.encode(nameFile, StandardCharsets.UTF_8.toString());
 			if (4194304 > bytes.length) {
 				fileContent = new ByteArrayInputStream(bytes);
 				infoFile = loadFile(nameSite, nameDrive, fileContent, nameFileEncode);
